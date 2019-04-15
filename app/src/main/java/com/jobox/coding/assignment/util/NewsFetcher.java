@@ -1,15 +1,26 @@
 package com.jobox.coding.assignment.util;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jobox.coding.assignment.R;
+import com.jobox.coding.assignment.async.AsyncAction;
 import com.jobox.coding.assignment.callback.OnNewsFetchCallback;
 import com.jobox.coding.assignment.type.News;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,30 +47,67 @@ public class NewsFetcher {
     public void fetchCurrentNews(final OnNewsFetchCallback callback){
         calendar = Calendar.getInstance();
         String query = buildQuery(calendar);
-        fetchNews(query, callback);
+        new AsyncAction.FetchNews().execute(context, query, new ArrayList<>(), callback);
     }
 
     public void fetchMoreNews(final OnNewsFetchCallback callback) {
         calendar.add(Calendar.DATE, -1);
         String query = buildQuery(calendar);
-        fetchNews(query, callback);
+        new AsyncAction.FetchNews().execute(context, query, new ArrayList<>(), callback);
     }
 
-    private void fetchNews(String query, final OnNewsFetchCallback callback) {
+    public ArrayList<News> fetchNews(String query) {
         final ArrayList<News> newsList = new ArrayList<>();
-        Ion.with(context)
-                .load(query)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        for (JsonElement jsonNews : result.getAsJsonArray("articles")) {
-                            News news = new News(jsonNews.getAsJsonObject());
-                            newsList.add(news);
-                        }
-                        callback.onSuccess(newsList);
-                    }
-                });
+
+        try {
+            String json = readUrl(query);
+            JsonObject result = new Gson().fromJson(json, JsonObject.class);
+            for (JsonElement jsonNews : result.getAsJsonArray("articles")) {
+                News news = new News(jsonNews.getAsJsonObject());
+                newsList.add(news);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return newsList;
+
+//        Ion.with(context)
+//                .load(query)
+//                .asJsonObject()
+//                .setCallback(new FutureCallback<JsonObject>() {
+//                    @Override
+//                    public void onCompleted(Exception e, JsonObject result) {
+//                        for (JsonElement jsonNews : result.getAsJsonArray("articles")) {
+//                            News news = new News(jsonNews.getAsJsonObject());
+//                            newsList.add(news);
+//                        }
+//                        callback.onSuccess(newsList);
+//                    }
+//                });
+
+    }
+
+    private String readUrl(String urlString) throws IOException {
+        BufferedReader reader = null;
+        try {
+            URL url = new URL(urlString);
+            reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            StringBuffer buffer = new StringBuffer();
+            int read;
+            char[] chars = new char[1024];
+            while ((read = reader.read(chars)) != -1) {
+                buffer.append(chars, 0, read);
+            }
+            return buffer.toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+        return "";
     }
 
     private String buildQuery(Calendar date) {
@@ -76,5 +124,7 @@ public class NewsFetcher {
         return query;
 
     }
+
+
 
 }

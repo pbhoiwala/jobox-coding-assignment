@@ -1,17 +1,30 @@
 package com.jobox.coding.assignment.util;
 
+import android.app.Activity;
+import android.content.Context;
 import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
 
 import java.util.Calendar;
 import java.util.Locale;
 
 public class Util {
 
+    public static float scale;
+    public static float screenHeight;
+    public static float screenWidth;
+
     public static final int SECONDS_UNIT = 60;
     public static final int MINUTES_UNIT = 60;
     public static final int HOURS_UNIT = 24;
     public static final int DAYS_UNIT = 24 * 7;
     public static final int YEARS_UNIT = 365;
+
+    public Util(Context context) {
+        scale = context.getResources().getDisplayMetrics().density;
+        screenWidth = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
+        screenHeight = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
+    }
 
     /**
      * Takes in the time of the post and creates a fancy string difference

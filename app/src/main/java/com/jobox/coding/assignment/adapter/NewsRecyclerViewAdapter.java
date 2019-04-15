@@ -2,6 +2,7 @@ package com.jobox.coding.assignment.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.Visibility;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -17,8 +18,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.jobox.coding.assignment.R;
+import com.jobox.coding.assignment.async.AsyncAction;
+import com.jobox.coding.assignment.callback.OnCompressBitmapCallback;
 import com.jobox.coding.assignment.type.News;
+import com.jobox.coding.assignment.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 
@@ -61,6 +68,7 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public class NewsViewHolder extends RecyclerView.ViewHolder {
 
+        private TextView titleTextView;
         private TextView authorDateTextView;
         private TextView summaryTextView;
         private ImageView newsImageView;
@@ -70,6 +78,7 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         NewsViewHolder(View itemView) {
             super(itemView);
 
+            titleTextView = itemView.findViewById(R.id.news_recycler_view_item_title);
             authorDateTextView = itemView.findViewById(R.id.news_recycler_view_item_author_date);
             summaryTextView = itemView.findViewById(R.id.news_recycler_view_item_summary);
             newsImageView = itemView.findViewById(R.id.news_recycler_view_item_image_view);
@@ -85,8 +94,10 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             title += "<b>" + news.getAuthor() + "</b>";
             title += " • " + news.getPublishedDate();
 
-            authorDateTextView.setText(Html.fromHtml(title));
+            titleTextView.setText(news.getTitle());
+            titleTextView.setSelected(true);
 
+            authorDateTextView.setText(Html.fromHtml(title));
             summaryTextView.setText(news.getSummary());
 
             boolean hasImage = news.getImageUrl() != null && !news.getImageUrl().isEmpty();
@@ -94,13 +105,20 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 Glide.with(context)
                         .asBitmap()
                         .load(news.getImageUrl())
-                        .apply(new RequestOptions().fitCenter())
+                        .apply(new RequestOptions().centerInside().override((int) (Util.screenWidth * 0.9)))
                         .into(new BitmapImageViewTarget(newsImageView) {
                             @Override
                             protected void setResource(Bitmap resource) {
-                                newsImageView.setImageBitmap(resource);
-                                newsImageView.setVisibility(View.VISIBLE);
-                                // TODO Add progress bar
+                                if (resource != null) {
+                                    new AsyncAction.CompressBitmap().execute(this, resource, new OnCompressBitmapCallback() {
+                                        @Override
+                                        public void onSuccess(Bitmap decode) {
+                                            newsImageView.setImageBitmap(decode);
+                                            newsImageView.setVisibility(View.VISIBLE);
+                                        }
+                                    });
+
+                                }
                             }
                 });
 
