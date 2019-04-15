@@ -1,13 +1,15 @@
-package com.jobox.coding.assignment;
+package com.jobox.coding.assignment.type;
 
 
 import com.google.gson.JsonObject;
+import com.jobox.coding.assignment.util.Util;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import io.realm.RealmObject;
 
@@ -52,12 +54,41 @@ public class News extends RealmObject {
         if (!jsonNews.get("publishedAt").isJsonNull()) {
             String publishedDateString = jsonNews.get("publishedAt").getAsString();
             try {
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
                 this.publishedDate = df.parse(publishedDateString);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
 
+    }
+
+    public String getAuthor() {
+        return author != null && !author.isEmpty() ? author : "No Author";
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public String getPublishedDate() {
+        return publishedDate != null ? Util.getFancyDateDifferenceString(publishedDate.getTime()) : "No Date";
+    }
+
+    public String getContent() {
+        return content;
     }
 }

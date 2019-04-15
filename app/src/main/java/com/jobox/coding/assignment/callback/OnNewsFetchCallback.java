@@ -1,6 +1,6 @@
 package com.jobox.coding.assignment.callback;
 
-import com.jobox.coding.assignment.News;
+import com.jobox.coding.assignment.type.News;
 
 import java.util.ArrayList;
 

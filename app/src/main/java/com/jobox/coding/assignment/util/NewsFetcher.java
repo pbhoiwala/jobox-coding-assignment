@@ -1,10 +1,12 @@
-package com.jobox.coding.assignment;
+package com.jobox.coding.assignment.util;
 
 import android.content.Context;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.jobox.coding.assignment.R;
 import com.jobox.coding.assignment.callback.OnNewsFetchCallback;
+import com.jobox.coding.assignment.type.News;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class Fetcher {
+public class NewsFetcher {
 
     private static String QUERY_START = "https://newsapi.org/v2/everything?q=ai";
     private static String QUERY_LANG= "&language=en";
@@ -26,7 +28,7 @@ public class Fetcher {
     private Context context;
     private Calendar calendar;
 
-    public Fetcher(Context context) {
+    public NewsFetcher(Context context) {
         this.context = context;
         this.calendar = Calendar.getInstance();
     }
@@ -62,7 +64,7 @@ public class Fetcher {
 
     private String buildQuery(Calendar date) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        String day = df.format(calendar.getTime());
+        String day = df.format(date.getTime());
 
         String query = QUERY_START +
                 QUERY_LANG +

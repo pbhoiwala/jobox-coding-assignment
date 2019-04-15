@@ -1,11 +1,12 @@
-package com.jobox.coding.assignment;
+package com.jobox.coding.assignment.controller;
 
 import android.content.Context;
+
+import com.jobox.coding.assignment.type.News;
 
 import java.util.ArrayList;
 
 import io.realm.Realm;
-import io.realm.RealmObject;
 import io.realm.RealmResults;
 
 
@@ -14,22 +15,6 @@ public class CacheController {
     private static CacheController cacheController;
 
     private Realm realm;
-
-    private CacheController(Context context) {
-        Realm.init(context);
-        realm = Realm.getDefaultInstance();
-    }
-
-    /**
-     * Singleton
-     * @return
-     */
-    public static CacheController getInstance(Context  context) {
-        if (cacheController == null) {
-            return new CacheController(context);
-        }
-        return cacheController;
-    }
 
     public void cacheNews(final ArrayList<News> newsList) {
         clearAllCache();
@@ -49,6 +34,22 @@ public class CacheController {
         realm.beginTransaction();
         newsList.deleteAllFromRealm();
         realm.commitTransaction();
+    }
+
+    private CacheController(Context context) {
+        Realm.init(context);
+        realm = Realm.getDefaultInstance();
+    }
+
+    /**
+     * Singleton
+     * @return
+     */
+    public static CacheController getInstance(Context  context) {
+        if (cacheController == null) {
+            cacheController = new CacheController(context);
+        }
+        return cacheController;
     }
 
 
