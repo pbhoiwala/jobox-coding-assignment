@@ -124,9 +124,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
             public void onScrollChanged() {
                 View v = nestedScrollView.getChildAt(0);
 
+                if (nestedScrollView.getScrollY() == 0) {
+                    animate.animateCardViewVisibility(goToTopCardView, false);
+                }
+
                 if (shouldLoadMore && nestedScrollView.getScrollY() >= ((v.getMeasuredHeight() - nestedScrollView.getMeasuredHeight()))) {
                     shouldLoadMore = false;
-                    Toast.makeText(MainActivity.this, "End reached", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(MainActivity.this, "End reached", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.VISIBLE);
 
                     fetchMoreNewsArticle();

@@ -99,6 +99,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:scaleX="0"
         android:scaleY="0"
+        app:cardElevation="4dp"
         app:cardCornerRadius="14dp">
 
         <LinearLayout
