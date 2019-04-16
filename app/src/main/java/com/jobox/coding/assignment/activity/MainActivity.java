@@ -2,11 +2,13 @@ package com.jobox.coding.assignment.activity;
 
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private TextView titleTextView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private NestedScrollView nestedScrollView;
 
     private ProgressBar progressBar;
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         appBarLayout = findViewById(R.id.main_activity_app_bar_layout);
         toolbar = findViewById(R.id.main_activity_toolbar);
         titleTextView = findViewById(R.id.main_activity_toolbar_title_text_view);
+        swipeRefreshLayout = findViewById(R.id.main_activity_swipe_refresh_layout);
         nestedScrollView = findViewById(R.id.main_activity_nested_scroll_view);
 
         progressBar = findViewById(R.id.main_activity_recycler_view_progress_bar);
@@ -78,6 +82,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         setupInterfaceElements();
 
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (nestedScrollView.getScrollY() > 0) {
+            appBarLayout.setExpanded(true, true);
+            nestedScrollView.smoothScrollTo(0, 0);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void setupToolbar() {
@@ -113,10 +127,26 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         fetchNewsArticles();
     }
 
+    private void setupSwipeRefreshLayout() {
+        int[] colors = {R.color.colorPrimary};
+        swipeRefreshLayout.setColorScheme(colors);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                shouldLoadMore = false;
+                newsArrayList.clear();
+                newsRecyclerViewAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+                fetchNewsArticles();
+            }
+        });
+    }
+
     private void setupInterfaceElements() {
         setupToolbar();
         setupNestedScrollView();
         setupNewsRecyclerView();
+        setupSwipeRefreshLayout();
     }
 
     private void fetchNewsArticles() {
@@ -160,7 +190,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
                 newsRecyclerViewAdapter.notifyItemRangeInserted(newsArrayList.size(), newsList.size());
                 newsRecyclerView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
-
                 shouldLoadMore = true;
             }
 
@@ -190,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
                         public void onClick(View view) {
                             fetchNewsArticles();
                             Toast.makeText(MainActivity.this, "News successfully refreshed", Toast.LENGTH_SHORT).show();
+                            appBarLayout.setExpanded(true, true);
                             nestedScrollView.smoothScrollTo(0,0);
                         }
                     })
