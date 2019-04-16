@@ -1,8 +1,11 @@
 package com.jobox.coding.assignment.activity;
 
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 import com.jobox.coding.assignment.adapter.NewsRecyclerViewAdapter;
 import com.jobox.coding.assignment.controller.CacheController;
 import com.jobox.coding.assignment.controller.RecyclerViewBuilder;
+import com.jobox.coding.assignment.network.NetworkStateReceiver;
 import com.jobox.coding.assignment.util.NewsFetcher;
 import com.jobox.coding.assignment.type.News;
 import com.jobox.coding.assignment.R;
@@ -28,8 +32,9 @@ import com.jobox.coding.assignment.util.Util;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateReceiverListener {
 
+    private NetworkStateReceiver networkStateReceiver;
     private CacheController cacheController;
     private NewsFetcher newsFetcher;
     private RecyclerViewBuilder recyclerViewBuilder;
@@ -46,13 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<News> newsArrayList;
 
     private boolean shouldLoadMore = false;
-
+    private boolean networkInterrupted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
-
+        setupNetworkListener();
         new Util(this);
 
         cacheController = CacheController.getInstance(this);
@@ -93,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "End reached", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.VISIBLE);
 
-                    //TODO: Fetch more news and set boolean shouldLoadMore back to true
                     fetchMoreNewsArticle();
 
                 }
@@ -116,27 +120,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchNewsArticles() {
-        progressBar.setVisibility(View.VISIBLE);
-
-        newsFetcher.fetchCurrentNews(new OnNewsFetchCallback() {
-            @Override
-            public void onSuccess(ArrayList<News> newsList) {
-                cacheController.cacheNews(newsList);
-                newsArrayList.addAll(newsList);
-                newsRecyclerViewAdapter.notifyDataSetChanged();
-                newsRecyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-
-                shouldLoadMore = true;
+        if (!Util.isNetworkAvailable(this)) {
+            newsArrayList.addAll(cacheController.loadCachedNews());
+            newsRecyclerViewAdapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.INVISIBLE);
+            shouldLoadMore = false;
+            if (newsArrayList.isEmpty()) {
+                Toast.makeText(this, "No cached data", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            progressBar.setVisibility(View.VISIBLE);
+            newsFetcher.fetchCurrentNews(new OnNewsFetchCallback() {
+                @Override
+                public void onSuccess(ArrayList<News> newsList) {
+                    cacheController.cacheNews(newsList);
+                    newsArrayList.addAll(newsList);
+                    newsRecyclerViewAdapter.notifyDataSetChanged();
+                    newsRecyclerView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    shouldLoadMore = true;
+                }
 
-            @Override
-            public void onFailure() {
-                newsRecyclerViewAdapter.notifyDataSetChanged();
-                newsRecyclerView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            }
-        });
+                @Override
+                public void onFailure() {
+                    newsRecyclerViewAdapter.notifyDataSetChanged();
+                    newsRecyclerView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
     }
 
     private void fetchMoreNewsArticle() {
@@ -162,6 +174,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void setupNetworkListener() {
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        this.registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
 
+    @Override
+    public void onNetworkConnected() {
+        if (networkInterrupted) {
+            CoordinatorLayout parentLayout = findViewById(R.id.main_activity_coordinator_layout);
+            Snackbar.make(parentLayout, "Network available", Snackbar.LENGTH_LONG)
+                    .setAction("REFRESH", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            fetchNewsArticles();
+                            Toast.makeText(MainActivity.this, "News successfully refreshed", Toast.LENGTH_SHORT).show();
+                            nestedScrollView.smoothScrollTo(0,0);
+                        }
+                    })
+                    .setActionTextColor(getResources().getColor(R.color.colorPrimary))
+                    .show();
+        }
+    }
 
+    @Override
+    public void onNetworkDisconnected() {
+        CoordinatorLayout parentLayout = findViewById(R.id.main_activity_coordinator_layout);
+        Snackbar.make(parentLayout, "Network unavailable", Snackbar.LENGTH_INDEFINITE)
+                .show();
+        networkInterrupted = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        networkStateReceiver.removeListener(this);
+        this.unregisterReceiver(networkStateReceiver);
+    }
 }
