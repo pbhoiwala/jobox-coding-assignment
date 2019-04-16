@@ -2,8 +2,6 @@ package com.jobox.coding.assignment.activity;
 
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -11,10 +9,10 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.OrientationListener;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
@@ -26,6 +24,7 @@ import com.jobox.coding.assignment.adapter.NewsRecyclerViewAdapter;
 import com.jobox.coding.assignment.controller.CacheController;
 import com.jobox.coding.assignment.controller.RecyclerViewBuilder;
 import com.jobox.coding.assignment.network.NetworkStateReceiver;
+import com.jobox.coding.assignment.util.Animate;
 import com.jobox.coding.assignment.util.NewsFetcher;
 import com.jobox.coding.assignment.type.News;
 import com.jobox.coding.assignment.R;
@@ -37,6 +36,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateReceiverListener {
 
     private NetworkStateReceiver networkStateReceiver;
+
+    private Animate animate;
     private CacheController cacheController;
     private NewsFetcher newsFetcher;
     private RecyclerViewBuilder recyclerViewBuilder;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     private TextView titleTextView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private NestedScrollView nestedScrollView;
+    private CardView goToTopCardView;
+    private LinearLayout goToTopButtonLinearLayout;
 
     private ProgressBar progressBar;
     private RecyclerView newsRecyclerView;
@@ -56,13 +59,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     private boolean shouldLoadMore = false;
     private boolean networkInterrupted = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_layout);
-        setupNetworkListener();
+
         new Util(this);
 
+        setupNetworkListener();
+
+        animate = new Animate(this);
         cacheController = CacheController.getInstance(this);
         newsFetcher = new NewsFetcher(this);
         recyclerViewBuilder = new RecyclerViewBuilder(this);
@@ -73,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         titleTextView = findViewById(R.id.main_activity_toolbar_title_text_view);
         swipeRefreshLayout = findViewById(R.id.main_activity_swipe_refresh_layout);
         nestedScrollView = findViewById(R.id.main_activity_nested_scroll_view);
+        goToTopCardView = findViewById(R.id.main_activity_go_to_top_card_view);
+        goToTopButtonLinearLayout = findViewById(R.id.main_activity_go_to_top_button_linear_layout);
 
         progressBar = findViewById(R.id.main_activity_recycler_view_progress_bar);
         newsRecyclerView = findViewById(R.id.main_activity_recycler_view);
@@ -100,6 +109,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
             getSupportActionBar().setTitle("");
         }
         titleTextView.setText("jobox.ai");
+
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+                animate.animateCardViewVisibility(goToTopCardView, nestedScrollView.getScrollY() != 0 && i == 0);
+            }
+        });
     }
 
     private void setupNestedScrollView() {
@@ -107,13 +123,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
             @Override
             public void onScrollChanged() {
                 View v = nestedScrollView.getChildAt(0);
+
                 if (shouldLoadMore && nestedScrollView.getScrollY() >= ((v.getMeasuredHeight() - nestedScrollView.getMeasuredHeight()))) {
                     shouldLoadMore = false;
                     Toast.makeText(MainActivity.this, "End reached", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.VISIBLE);
 
                     fetchMoreNewsArticle();
-
                 }
             }
         });
@@ -142,11 +158,23 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         });
     }
 
+    private void setupGoToTopButtonLinearLayout() {
+        goToTopButtonLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animate.animateCardViewVisibility(goToTopCardView, false);
+                appBarLayout.setExpanded(true, true);
+                nestedScrollView.smoothScrollTo(0, 0);
+            }
+        });
+    }
+
     private void setupInterfaceElements() {
         setupToolbar();
         setupNestedScrollView();
         setupNewsRecyclerView();
         setupSwipeRefreshLayout();
+        setupGoToTopButtonLinearLayout();
     }
 
     private void fetchNewsArticles() {
