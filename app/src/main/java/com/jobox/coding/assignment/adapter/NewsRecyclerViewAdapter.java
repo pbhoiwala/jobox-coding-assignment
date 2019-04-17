@@ -2,12 +2,9 @@ package com.jobox.coding.assignment.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.opengl.Visibility;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +22,17 @@ import com.jobox.coding.assignment.type.News;
 import com.jobox.coding.assignment.util.IntentTo;
 import com.jobox.coding.assignment.util.Util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
 
 
 public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private final int VIEW_TYPE_1 = 0;
+    private final int VIEW_TYPE_2 = 1;
+    private final int VIEW_TYPE_3 = 2;
 
     private IntentTo intentTo;
     private LayoutInflater layoutInflater;
@@ -49,13 +50,24 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public int getItemViewType(int position) {
-        return 0;
+        return newsArrayList.get(position).getViewType();
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = layoutInflater.inflate(R.layout.news_recycler_view_item_layout, parent, false);
+        View view = null;
+        switch (viewType) {
+            case VIEW_TYPE_1:
+                view = layoutInflater.inflate(R.layout.news_recycler_view_item_layout_1, parent, false);
+                break;
+            case VIEW_TYPE_2:
+                view = layoutInflater.inflate(R.layout.news_recycler_view_item_layout_2, parent, false);
+                break;
+            case VIEW_TYPE_3:
+                view = layoutInflater.inflate(R.layout.news_recycler_view_item_layout_3, parent, false);
+                break;
+        }
         return new NewsViewHolder(view);
     }
 
@@ -104,6 +116,8 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             titleTextView.setSelected(true);
 
             authorDateTextView.setText(Html.fromHtml(title));
+            authorDateTextView.setSelected(true);
+
             summaryTextView.setText(news.getSummary());
 
             boolean hasImage = news.getImageUrl() != null && !news.getImageUrl().isEmpty();

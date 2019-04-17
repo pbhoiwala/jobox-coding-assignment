@@ -6,6 +6,7 @@
     <color name="colorAccent">#3D3D3D</color>
 
     <color name="colorBackground">#E0E0E0</color>
+    <color name="colorBackgroundTrans">#63000000</color>
     <color name="colorDivider">#B6B6B6</color>
 
 </resources>

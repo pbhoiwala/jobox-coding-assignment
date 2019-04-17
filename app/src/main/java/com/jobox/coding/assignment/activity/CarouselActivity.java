@@ -77,7 +77,7 @@ public class CarouselActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        titleTextView.setText("Carousel");
+        titleTextView.setText("News Carousel");
     }
 
     private void setupNewsViewPager() {

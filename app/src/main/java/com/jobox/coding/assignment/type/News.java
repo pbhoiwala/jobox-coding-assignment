@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 
 import io.realm.RealmObject;
@@ -22,6 +23,8 @@ public class News extends RealmObject {
     private String  imageUrl;
     private Date publishedDate;
     private String content;
+
+    private int viewType;
 
     public News() { }
 
@@ -62,6 +65,8 @@ public class News extends RealmObject {
             }
         }
 
+        viewType = (int) (Math.random() * 3);
+
     }
 
     public String getAuthor() {
@@ -90,5 +95,9 @@ public class News extends RealmObject {
 
     public String getContent() {
         return content;
+    }
+
+    public int getViewType() {
+        return viewType;
     }
 }

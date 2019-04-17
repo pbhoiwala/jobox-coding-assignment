@@ -3,6 +3,7 @@ package com.jobox.coding.assignment.activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -46,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     private NewsFetcher newsFetcher;
     private RecyclerViewBuilder recyclerViewBuilder;
 
-    private CoordinatorLayout coordinatorLayout;
     private AppBarLayout appBarLayout;
     private Toolbar toolbar;
     private TextView titleTextView;
@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         newsFetcher = new NewsFetcher(this);
         recyclerViewBuilder = new RecyclerViewBuilder(this);
 
-        coordinatorLayout = findViewById(R.id.main_activity_coordinator_layout);
         appBarLayout = findViewById(R.id.main_activity_app_bar_layout);
         toolbar = findViewById(R.id.main_activity_toolbar);
         titleTextView = findViewById(R.id.main_activity_toolbar_title_text_view);
@@ -95,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         setupInterfaceElements();
     }
 
+    /**
+     * If user has scrolled down, scroll to the top when they press
+     * the back button otherwise perform normal backPress operation
+     */
     @Override
     public void onBackPressed() {
         if (nestedScrollView.getScrollY() > 0) {
@@ -105,6 +108,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         }
     }
 
+    /**
+     * Takes
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -119,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
                         View view = layoutManager.findViewByPosition(resultNewsPosition);
                         if (view != null) {
                             float y = view.getY();
-                            nestedScrollView.smoothScrollTo(0, (int) y);
+                            nestedScrollView.scrollTo(0, (int) y);
                         }
                     }
 
@@ -133,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
-        titleTextView.setText("jobox.ai");
+        titleTextView.setText("News List");
 
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
@@ -170,6 +179,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         newsRecyclerViewAdapter.setHasStableIds(true);
         newsRecyclerView.setAdapter(newsRecyclerViewAdapter);
         fetchNewsArticles();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                newsRecyclerViewAdapter.notifyDataSetChanged();
+            }
+        }, 60000);
     }
 
     private void setupSwipeRefreshLayout() {
