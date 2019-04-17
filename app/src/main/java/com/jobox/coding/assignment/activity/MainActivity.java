@@ -1,7 +1,9 @@
 package com.jobox.coding.assignment.activity;
 
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -21,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jobox.coding.assignment.adapter.NewsRecyclerViewAdapter;
+import com.jobox.coding.assignment.constant.IntentCode;
+import com.jobox.coding.assignment.constant.IntentKey;
 import com.jobox.coding.assignment.controller.CacheController;
 import com.jobox.coding.assignment.controller.RecyclerViewBuilder;
 import com.jobox.coding.assignment.network.NetworkStateReceiver;
@@ -89,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
         newsArrayList = new ArrayList<>();
 
         setupInterfaceElements();
-
-
     }
 
     @Override
@@ -100,6 +102,29 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
             nestedScrollView.smoothScrollTo(0, 0);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data != null) {
+            if (requestCode == IntentCode.CAROUSEL_INTENT_CODE) {
+                if (resultCode == RESULT_OK) {
+
+                    //TODO: Place in a function and pass the Intent data as the parameter or the int resultNewsPosition
+                    int resultNewsPosition = data.getIntExtra(IntentKey.RESULT_NEWS_POSITION, 0);
+                    RecyclerView.LayoutManager layoutManager = newsRecyclerView.getLayoutManager();
+                    if (layoutManager != null) {
+                        View view = layoutManager.findViewByPosition(resultNewsPosition);
+                        if (view != null) {
+                            float y = view.getY();
+                            nestedScrollView.smoothScrollTo(0, (int) y);
+                        }
+                    }
+
+                }
+            }
         }
     }
 
@@ -148,8 +173,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     }
 
     private void setupSwipeRefreshLayout() {
-        int[] colors = {R.color.colorPrimary};
-        swipeRefreshLayout.setColorScheme(colors);
+        swipeRefreshLayout.setColorScheme(Util.colors);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -214,10 +238,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateRecei
     }
 
     private void fetchMoreNewsArticle() {
-
         newsFetcher.fetchMoreNews(new OnNewsFetchCallback() {
             @Override
             public void onSuccess(ArrayList<News> newsList) {
+                cacheController.cacheMoreNews(newsList);
                 newsArrayList.addAll(newsList);
                 newsRecyclerViewAdapter.notifyItemRangeInserted(newsArrayList.size(), newsList.size());
                 newsRecyclerView.setVisibility(View.VISIBLE);

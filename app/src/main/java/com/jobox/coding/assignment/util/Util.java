@@ -7,6 +7,8 @@ import android.net.NetworkInfo;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 
+import com.jobox.coding.assignment.R;
+
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -15,6 +17,8 @@ public class Util {
     public static float scale;
     public static float screenHeight;
     public static float screenWidth;
+
+    public static int[] colors = {R.color.colorPrimary};
 
     public static final int SECONDS_UNIT = 60;
     public static final int MINUTES_UNIT = 60;

@@ -16,10 +16,18 @@ public class CacheController {
 
     private Realm realm;
 
+
+
     public void cacheNews(final ArrayList<News> newsList) {
         clearAllCache();
         realm.beginTransaction();
         realm.insert(newsList);
+        realm.commitTransaction();
+    }
+
+    public void cacheMoreNews(final ArrayList<News> newsArrayList) {
+        realm.beginTransaction();
+        realm.insert(newsArrayList);
         realm.commitTransaction();
     }
 
@@ -29,7 +37,7 @@ public class CacheController {
 
     }
 
-    private void clearAllCache() {
+    public void clearAllCache() {
         RealmResults<News> newsList = realm.where(News.class).findAll();
         realm.beginTransaction();
         newsList.deleteAllFromRealm();

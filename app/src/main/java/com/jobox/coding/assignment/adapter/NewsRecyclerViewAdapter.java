@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -21,6 +22,7 @@ import com.jobox.coding.assignment.R;
 import com.jobox.coding.assignment.async.AsyncAction;
 import com.jobox.coding.assignment.callback.OnCompressBitmapCallback;
 import com.jobox.coding.assignment.type.News;
+import com.jobox.coding.assignment.util.IntentTo;
 import com.jobox.coding.assignment.util.Util;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +33,7 @@ import java.util.ArrayList;
 
 public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private IntentTo intentTo;
     private LayoutInflater layoutInflater;
 
     private Context context;
@@ -40,6 +43,7 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         this.context = context;
         this.newsArrayList = newsArrayList;
 
+        intentTo = new IntentTo(context);
         layoutInflater = LayoutInflater.from(context);
     }
 
@@ -57,7 +61,7 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((NewsViewHolder) holder).setData(newsArrayList.get(position));
+        ((NewsViewHolder) holder).setData(newsArrayList.get(position), position);
     }
 
     @Override
@@ -68,6 +72,7 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public class NewsViewHolder extends RecyclerView.ViewHolder {
 
+        private LinearLayout linearLayout;
         private TextView titleTextView;
         private TextView authorDateTextView;
         private TextView summaryTextView;
@@ -78,18 +83,19 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         NewsViewHolder(View itemView) {
             super(itemView);
 
+            linearLayout = itemView.findViewById(R.id.news_recycler_view_item_linear_layout);
             titleTextView = itemView.findViewById(R.id.news_recycler_view_item_title);
             authorDateTextView = itemView.findViewById(R.id.news_recycler_view_item_author_date);
             summaryTextView = itemView.findViewById(R.id.news_recycler_view_item_summary);
             newsImageView = itemView.findViewById(R.id.news_recycler_view_item_image_view);
         }
 
-        private void setData(News news) {
+        private void setData(News news, int position) {
             this.news = news;
-            populateInterfaceElements();
+            populateInterfaceElements(position);
         }
 
-        private void populateInterfaceElements() {
+        private void populateInterfaceElements(final int position) {
             String title = "";
             title += "<b>" + news.getAuthor() + "</b>";
             title += " • " + news.getPublishedDate();
@@ -126,7 +132,12 @@ public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 newsImageView.setVisibility(View.GONE);
             }
 
-
+            linearLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    intentTo.carouselActivity(position);
+                }
+            });
         }
 
     }

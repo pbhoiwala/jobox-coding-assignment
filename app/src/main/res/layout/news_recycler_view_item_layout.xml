@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/news_recycler_view_item_linear_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
@@ -19,13 +18,13 @@
         app:cardCornerRadius="14dp">
 
         <LinearLayout
+            android:id="@+id/news_recycler_view_item_linear_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:clickable="true"
             android:background="@drawable/ripple_selector_green_white"
             android:orientation="vertical">
 
