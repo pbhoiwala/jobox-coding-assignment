@@ -23,9 +23,6 @@ import com.jobox.coding.assignment.util.IntentTo;
 import com.jobox.coding.assignment.util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
 
 
 public class NewsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

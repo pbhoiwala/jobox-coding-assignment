@@ -16,6 +16,12 @@ public class RecyclerViewBuilder {
         this.context = context;
     }
 
+    /**
+     * Builds recycler view with given parameters
+     * @param recyclerView
+     * @param orientation
+     * @param hasDivider
+     */
     public void setupVerticalRecyclerView(RecyclerView recyclerView, int orientation, boolean hasDivider) {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         linearLayoutManager.setAutoMeasureEnabled(false);

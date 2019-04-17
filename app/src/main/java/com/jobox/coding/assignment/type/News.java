@@ -8,8 +8,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Random;
 import java.util.TimeZone;
 
 import io.realm.RealmObject;
@@ -28,6 +26,10 @@ public class News extends RealmObject {
 
     public News() { }
 
+    /**
+     * Takes the jsonObject retrieved using the gson
+     * library and constructs the News object
+     */
     public News(JsonObject jsonNews) {
 
         if (!jsonNews.get("author").isJsonNull()) {

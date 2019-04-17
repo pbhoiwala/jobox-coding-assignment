@@ -1,10 +1,6 @@
 package com.jobox.coding.assignment.util;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -13,8 +9,6 @@ import com.jobox.coding.assignment.R;
 import com.jobox.coding.assignment.async.AsyncAction;
 import com.jobox.coding.assignment.callback.OnNewsFetchCallback;
 import com.jobox.coding.assignment.type.News;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +23,7 @@ import java.util.Locale;
 
 public class NewsFetcher {
 
+    // Query builders
     private static String QUERY_START = "https://newsapi.org/v2/everything?q=ai";
     private static String QUERY_LANG= "&language=en";
     private static String QUERY_FROM = "&from=";
@@ -44,18 +39,34 @@ public class NewsFetcher {
         this.calendar = Calendar.getInstance();
     }
 
+    /**
+     * Initializes the calendar instance to current time and builds a query
+     * Then calls fetchNews using an Async task
+     */
     public void fetchCurrentNews(final OnNewsFetchCallback callback){
         calendar = Calendar.getInstance();
         String query = buildQuery(calendar);
         new AsyncAction.FetchNews().execute(context, query, new ArrayList<>(), callback);
     }
 
+    /**
+     * Subtracts a day from the calendar instance and builds the query
+     * then calls fetchNews using an Async task
+     * @param callback
+     */
     public void fetchMoreNews(final OnNewsFetchCallback callback) {
         calendar.add(Calendar.DATE, -1);
         String query = buildQuery(calendar);
         new AsyncAction.FetchNews().execute(context, query, new ArrayList<>(), callback);
     }
 
+    /**
+     * Takes a query and fetches json for that query. Then the jsonObject
+     * is parsed and a list of News is constructed and returned.
+     * All of the above happens asynchronously
+     * @param query - url Query for news api
+     * @return - list of News
+     */
     public ArrayList<News> fetchNews(String query) {
         final ArrayList<News> newsList = new ArrayList<>();
 
@@ -71,23 +82,13 @@ public class NewsFetcher {
             e.printStackTrace();
         }
         return newsList;
-
-//        Ion.with(context)
-//                .load(query)
-//                .asJsonObject()
-//                .setCallback(new FutureCallback<JsonObject>() {
-//                    @Override
-//                    public void onCompleted(Exception e, JsonObject result) {
-//                        for (JsonElement jsonNews : result.getAsJsonArray("articles")) {
-//                            News news = new News(jsonNews.getAsJsonObject());
-//                            newsList.add(news);
-//                        }
-//                        callback.onSuccess(newsList);
-//                    }
-//                });
-
     }
 
+    /**
+     * Uses InputStreamReder to fetch data from the given url
+     * @return String that is the json data retrieved from the api
+     * @throws IOException
+     */
     private String readUrl(String urlString) throws IOException {
         BufferedReader reader = null;
         try {
@@ -110,6 +111,12 @@ public class NewsFetcher {
         return "";
     }
 
+    /**
+     * Constructs the query by using some hard coded parameters and
+     * inserting the dates and api key at their corresponding spots
+     * @param date - for which the query is built
+     * @return
+     */
     private String buildQuery(Calendar date) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         String day = df.format(date.getTime());

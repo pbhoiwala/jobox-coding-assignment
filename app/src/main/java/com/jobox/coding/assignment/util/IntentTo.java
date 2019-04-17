@@ -18,6 +18,10 @@ public class IntentTo {
         this.context = context;
     }
 
+    /**
+     * Performs intent to carouselActivity with given position
+     * of the news article that was clicked
+     */
     public void carouselActivity(int position) {
         Intent carouselIntent = new Intent(context, CarouselActivity.class);
         carouselIntent.putExtra(IntentKey.NEWS_POSITION, position);

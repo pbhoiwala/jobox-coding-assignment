@@ -5,7 +5,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.format.DateFormat;
-import android.util.DisplayMetrics;
 
 import com.jobox.coding.assignment.R;
 
@@ -64,8 +63,6 @@ public class Util {
 
         // Check each calculated time unit until it is clear the unit of timeFromCurrent
         if (secondsTime < SECONDS_UNIT) {
-//                String fancyDateTail = secondsTime == 1 ? " second ago" : " seconds ago";
-//                fancyDateString = secondsTime + fancyDateTail;
             fancyDateString = "Just now";
         } else if (minutesTime < MINUTES_UNIT) {
             String fancyDateTail = minutesTime == 1 ? " minute ago" : " minutes ago";

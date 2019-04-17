@@ -1,6 +1,5 @@
 package com.jobox.coding.assignment.async;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,7 +41,6 @@ public class AsyncAction {
 
         @Override
         protected Object[] doInBackground(Object... params) {
-            Context context = (Context) params[0];
             Bitmap resource = (Bitmap) params[1];
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();

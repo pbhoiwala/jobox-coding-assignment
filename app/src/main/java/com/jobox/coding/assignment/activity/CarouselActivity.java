@@ -31,7 +31,11 @@ public class CarouselActivity extends AppCompatActivity {
 
     private int currentNewsPosition = 0;
 
-
+    /**
+     * Performs back press when user clicks the back button
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -58,6 +62,11 @@ public class CarouselActivity extends AppCompatActivity {
         setupInterfaceElements();
     }
 
+    /**
+     * Gets the current news user was on and puts the index
+     * integer in the intent data so the result gets received
+     * in MainActivity
+     */
     @Override
     public void onBackPressed() {
         Intent data = new Intent();

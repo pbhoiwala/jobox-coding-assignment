@@ -103,8 +103,6 @@ public class NewsViewPagerAdapter extends PagerAdapter {
             newsImageView.setVisibility(View.GONE);
         }
 
-
-
         collection.addView(view);
         collection.setTag(news);
         return view;

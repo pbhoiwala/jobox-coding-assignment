@@ -16,8 +16,10 @@ public class CacheController {
 
     private Realm realm;
 
-
-
+    /**
+     * Clears old cache and caches new data
+     * @param newsList
+     */
     public void cacheNews(final ArrayList<News> newsList) {
         clearAllCache();
         realm.beginTransaction();
@@ -25,33 +27,48 @@ public class CacheController {
         realm.commitTransaction();
     }
 
+    /**
+     * Caches more news articles (without clearing old cache)
+     * @param newsArrayList
+     */
     public void cacheMoreNews(final ArrayList<News> newsArrayList) {
         realm.beginTransaction();
         realm.insert(newsArrayList);
         realm.commitTransaction();
     }
 
+    /**
+     * Loads all cached news
+     * @return
+     */
     public ArrayList<News> loadCachedNews() {
         RealmResults<News> news = realm.where(News.class).findAll();
         return new ArrayList<>(realm.copyFromRealm(news));
-
     }
 
-    public void clearAllCache() {
+    /**
+     * Removes old cached data from database
+     */
+    private void clearAllCache() {
         RealmResults<News> newsList = realm.where(News.class).findAll();
         realm.beginTransaction();
         newsList.deleteAllFromRealm();
         realm.commitTransaction();
     }
 
+    /**
+     * Private cacheController constructor that initializes
+     * Realm instance
+     * @param context
+     */
     private CacheController(Context context) {
         Realm.init(context);
         realm = Realm.getDefaultInstance();
     }
 
     /**
-     * Singleton
-     * @return
+     * Singleton method to get the static instance of this class
+     * that is used instead of the constructor
      */
     public static CacheController getInstance(Context  context) {
         if (cacheController == null) {
